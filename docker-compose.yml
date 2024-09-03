@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: php-apache
+    ports:
+      - "8080:80" # Menghubungkan port 8080 di host ke port 80 di container
+    volumes:
+      - ./php/src:/var/www/html # Mount direktori aplikasi
+    networks:
+      - app_network
+
+  db:
+   image: mariadb:10.4.24
+   container_name: mariadbpakar
+   environment:
+     MYSQL_ROOT_PASSWORD: passwordroot
+     MYSQL_DATABASE: db_pakar
+     MYSQL_USER: user
+     MYSQL_PASSWORD: user
+   ports:
+     - "3306:3306" # Menghubungkan port 3306 di host ke port 3306 di container
+   volumes:
+     - mysql_data:/var/lib/mysql
+     - ./db:/docker-entrypoint-initdb.d
+ 
+   networks:
+     - app_network
+
+volumes:
+  mysql_data:
+
+networks:
+  app_network:
