@@ -1,0 +1,39 @@
+name: Build and Push Docker Image
+
+# Trigger workflow saat ada push ke branch "main"
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      # Langkah 1: Checkout kode dari repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Langkah 2: Setup Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Langkah 3: Login ke Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Langkah 4: Build Docker image dengan tag commit SHA dan latest
+      - name: Build and tag Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/php-app:${{ github.sha }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/php-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/php-app:latest
+
+      # Langkah 5: Push Docker image ke Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/php-app:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/php-app:latest
